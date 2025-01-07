@@ -108,6 +108,4 @@ with open(os.path.join(base_path, 'analysis', 'README.md'), 'w') as readme_file:
 # Creating ZIP Archive
 # Bundle the entire project directory into a ZIP file
 zip_file_path = shutil.make_archive(base_path.rstrip('/'), 'zip', base_path)
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
+
