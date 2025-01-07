@@ -16,3 +16,4 @@ My name is Burak Anlamaz (32366) my project will focus on my letterboxd data.
  4)New movies to watch according to my movie watching patterns
    
 Plan: First I will collect my data from the letterboxd app and preprocess it in order to work on it properly. Later on I will use EDA in order to anlyze my data. Finally I will visulalize the data I acquired.
+Hypothesis: Genres I watch most correspond with directors and genres of movies they produce.
