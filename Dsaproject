@@ -1,0 +1,110 @@
+# Movie Analytics Project
+
+This script provides an analysis of personal movie-watching trends and preferences. It is structured for easy presentation on GitHub.
+
+## Necessary Imports
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+import shutil
+
+# Setting up directories for the project
+base_path = '/mnt/data/MovieAnalytics/'
+folders = ['data', 'visualizations', 'analysis', 'scripts']
+
+# Create necessary directories
+for folder in folders:
+    os.makedirs(os.path.join(base_path, folder), exist_ok=True)
+
+# Loading Data
+# Here, we load the datasets into dataframes for analysis
+# Replace these placeholders with actual file paths or data sources
+dataframes = {
+    'profile': profile_df,  # Placeholder for profile dataframe
+    'watched': watched_df,
+    'ratings': ratings_df,
+    'diary': diary_df,
+    'reviews': reviews_df,
+    'watchlist': watchlist_df,
+    'comments': comments_df
+}
+
+# Save dataframes to the data folder
+for name, df in dataframes.items():
+    data_path = os.path.join(base_path, 'data', f"{name}.csv")
+    df.to_csv(data_path, index=False)
+
+# Viewing Trends Visualization
+# This graph shows the number of movies watched over time
+plt.figure(figsize=(12, 6))
+plt.plot(viewing_trends['Year-Month'].astype(str), viewing_trends['Movies Watched'], marker='o')
+plt.title('Viewing Trends Over Time', fontsize=14)
+plt.xlabel('Year-Month', fontsize=12)
+plt.ylabel('Movies Watched', fontsize=12)
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.savefig(os.path.join(base_path, 'visualizations', 'viewing_trends.jpeg'))
+plt.close()
+
+# Rating Distribution Visualization
+# This bar chart shows ratings between 1.0 and 5.0 with half-point intervals
+plt.figure(figsize=(10, 6))
+half_point_ratings = [x / 2 for x in range(2, 10 + 1)]
+rating_counts = ratings_df['Rating'].value_counts().reindex(half_point_ratings, fill_value=0)
+plt.bar(half_point_ratings, rating_counts, width=0.4, edgecolor='black', alpha=0.9)
+plt.title('Rating Distribution (1.0 to 5.0 with Half-Point Ratings)', fontsize=14)
+plt.xlabel('Rating', fontsize=12)
+plt.ylabel('Frequency', fontsize=12)
+plt.xticks(half_point_ratings)
+plt.tight_layout()
+plt.savefig(os.path.join(base_path, 'visualizations', 'rating_distribution_1_to_5.jpeg'))
+plt.close()
+
+# Average Rating Trends Visualization
+# This line chart shows the average ratings given over time
+plt.figure(figsize=(12, 6))
+plt.plot(avg_rating_by_month['Year-Month'].astype(str), avg_rating_by_month['Rating'], marker='o', color='purple')
+plt.title('Average Rating Trends Over Time', fontsize=14)
+plt.xlabel('Year-Month', fontsize=12)
+plt.ylabel('Average Rating', fontsize=12)
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.savefig(os.path.join(base_path, 'visualizations', 'average_rating_trends.jpeg'))
+plt.close()
+
+# Generating README.md
+# This file describes the project and provides instructions for usage
+readme_content = """
+# Movie Analytics Project
+
+This repository contains an analysis of personal movie-watching trends and preferences.
+
+## Repository Structure
+- `data/`: Raw and processed datasets.
+- `visualizations/`: Visualizations from the analysis.
+- `analysis/`: Jupyter Notebook and markdown files for results and recommendations.
+- `scripts/`: Python scripts for reproducibility.
+
+## Key Features
+1. Viewing trends over time.
+2. Rating distribution analysis.
+3. Insights into favorite genres and directors.
+4. Recommendations for new movies.
+5. Correlation analysis between genres and directors.
+
+## Setup
+1. Clone this repository.
+2. Install required libraries: `pip install -r requirements.txt`.
+3. Run `scripts/` for reproducibility.
+
+## Visualizations
+![Viewing Trends](visualizations/viewing_trends.jpeg)
+![Rating Distribution](visualizations/rating_distribution_1_to_5.jpeg)
+![Average Rating Trends](visualizations/average_rating_trends.jpeg)
+"""
+with open(os.path.join(base_path, 'analysis', 'README.md'), 'w') as readme_file:
+    readme_file.write(readme_content)
+
+# Creating ZIP Archive
+# Bundle the entire project directory into a ZIP file
+zip_file_path = shutil.make_archive(base_path.rstrip('/'), 'zip', base_path)
