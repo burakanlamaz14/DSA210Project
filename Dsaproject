@@ -1,15 +1,18 @@
-{for all "gg"
+# DSA210 Project
 
-This script provides an analysis of personal movie-watching trends and preferences. It is structured for easy presentation on GitHub.
+
 
 ## Necessary Imports
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import shutil
+from google.colab import drive
 
-# Setting up directories for the project
-base_path = '/mnt/data/MovieAnalytics/'
+# Mount Google Drive to access and save files
+drive.mount('/content/drive')
+
+# Set up directories in Google Drive
+base_path = '/content/drive/MyDrive/MovieAnalytics/'
 folders = ['data', 'visualizations', 'analysis', 'scripts']
 
 # Create necessary directories
@@ -17,10 +20,18 @@ for folder in folders:
     os.makedirs(os.path.join(base_path, folder), exist_ok=True)
 
 # Loading Data
-# Here, we load the datasets into dataframes for analysis
-# Replace these placeholders with actual file paths or data sources
+# Load the actual datasets from the 'data' folder in Google Drive
+profile_df = pd.read_csv(os.path.join(base_path, 'data', 'profile.txt'), sep='\t')
+watched_df = pd.read_csv(os.path.join(base_path, 'data', 'watched.txt'), sep='\t')
+ratings_df = pd.read_csv(os.path.join(base_path, 'data', 'ratings.txt'), sep='\t')
+diary_df = pd.read_csv(os.path.join(base_path, 'data', 'diary.txt'), sep='\t')
+reviews_df = pd.read_csv(os.path.join(base_path, 'data', 'reviews.txt'), sep='\t')
+watchlist_df = pd.read_csv(os.path.join(base_path, 'data', 'watchlist.txt'), sep='\t')
+comments_df = pd.read_csv(os.path.join(base_path, 'data', 'comments.txt'), sep='\t')
+
+# Organize dataframes into a dictionary for saving purposes
 dataframes = {
-    'profile': profile_df,  # Placeholder for profile dataframe
+    'profile': profile_df,
     'watched': watched_df,
     'ratings': ratings_df,
     'diary': diary_df,
@@ -29,15 +40,15 @@ dataframes = {
     'comments': comments_df
 }
 
-# Save dataframes to the data folder
+# Save dataframes back to the data folder in .txt format
 for name, df in dataframes.items():
-    data_path = os.path.join(base_path, 'data', f"{name}.csv")
-    df.to_csv(data_path, index=False)
+    data_path = os.path.join(base_path, 'data', f"{name}.txt")
+    df.to_csv(data_path, sep='\t', index=False)
 
 # Viewing Trends Visualization
 # This graph shows the number of movies watched over time
 plt.figure(figsize=(12, 6))
-plt.plot(viewing_trends['Year-Month'].astype(str), viewing_trends['Movies Watched'], marker='o')
+plt.plot(watched_df['Date'], watched_df['Count'], marker='o', color='blue')
 plt.title('Viewing Trends Over Time', fontsize=14)
 plt.xlabel('Year-Month', fontsize=12)
 plt.ylabel('Movies Watched', fontsize=12)
@@ -51,7 +62,7 @@ plt.close()
 plt.figure(figsize=(10, 6))
 half_point_ratings = [x / 2 for x in range(2, 10 + 1)]
 rating_counts = ratings_df['Rating'].value_counts().reindex(half_point_ratings, fill_value=0)
-plt.bar(half_point_ratings, rating_counts, width=0.4, edgecolor='black', alpha=0.9)
+plt.bar(half_point_ratings, rating_counts, width=0.4, edgecolor='black', color='orange', alpha=0.9)
 plt.title('Rating Distribution (1.0 to 5.0 with Half-Point Ratings)', fontsize=14)
 plt.xlabel('Rating', fontsize=12)
 plt.ylabel('Frequency', fontsize=12)
@@ -61,15 +72,43 @@ plt.savefig(os.path.join(base_path, 'visualizations', 'rating_distribution_1_to_
 plt.close()
 
 # Average Rating Trends Visualization
+
+if 'Average Rating' not in ratings_df.columns:
+    ratings_df['Average Rating'] = ratings_df.groupby('Date')['Rating'].transform('mean')
+
 # This line chart shows the average ratings given over time
 plt.figure(figsize=(12, 6))
-plt.plot(avg_rating_by_month['Year-Month'].astype(str), avg_rating_by_month['Rating'], marker='o', color='purple')
+plt.plot(ratings_df['Date'].unique(), ratings_df.groupby('Date')['Average Rating'].mean(), marker='o', color='purple')
 plt.title('Average Rating Trends Over Time', fontsize=14)
 plt.xlabel('Year-Month', fontsize=12)
 plt.ylabel('Average Rating', fontsize=12)
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.savefig(os.path.join(base_path, 'visualizations', 'average_rating_trends.jpeg'))
+plt.close()
+
+# Favorite Genres Visualization
+
+genres_df = reviews_df.groupby('Genre').size().reset_index(name='Count')
+plt.figure(figsize=(10, 6))
+plt.barh(genres_df['Genre'], genres_df['Count'], color='skyblue')
+plt.title('Top Genres', fontsize=14)
+plt.xlabel('Count', fontsize=12)
+plt.ylabel('Genre', fontsize=12)
+plt.tight_layout()
+plt.savefig(os.path.join(base_path, 'visualizations', 'favorite_genres.jpeg'))
+plt.close()
+
+# Favorite Directors Visualization
+
+directors_df = reviews_df.groupby('Director').size().reset_index(name='Count')
+plt.figure(figsize=(10, 6))
+plt.barh(directors_df['Director'], directors_df['Count'], color='lightgreen')
+plt.title('Top Directors', fontsize=14)
+plt.xlabel('Count', fontsize=12)
+plt.ylabel('Director', fontsize=12)
+plt.tight_layout()
+plt.savefig(os.path.join(base_path, 'visualizations', 'favorite_directors.jpeg'))
 plt.close()
 
 # Generating README.md
@@ -80,7 +119,7 @@ readme_content = """
 This repository contains an analysis of personal movie-watching trends and preferences.
 
 ## Repository Structure
-- `data/`: Raw and processed datasets.
+- `data/`: Raw and processed datasets in .txt format.
 - `visualizations/`: Visualizations from the analysis.
 - `analysis/`: Jupyter Notebook and markdown files for results and recommendations.
 - `scripts/`: Python scripts for reproducibility.
@@ -92,20 +131,23 @@ This repository contains an analysis of personal movie-watching trends and prefe
 4. Recommendations for new movies.
 5. Correlation analysis between genres and directors.
 
-## Setup
-1. Clone this repository.
-2. Install required libraries: `pip install -r requirements.txt`.
-3. Run `scripts/` for reproducibility.
-
 ## Visualizations
+### Viewing Trends
 ![Viewing Trends](visualizations/viewing_trends.jpeg)
+
+### Rating Distribution
 ![Rating Distribution](visualizations/rating_distribution_1_to_5.jpeg)
+
+### Average Rating Trends
 ![Average Rating Trends](visualizations/average_rating_trends.jpeg)
+
+### Favorite Genres
+![Favorite Genres](visualizations/favorite_genres.jpeg)
+
+### Favorite Directors
+![Favorite Directors](visualizations/favorite_directors.jpeg)
+
+
 """
 with open(os.path.join(base_path, 'analysis', 'README.md'), 'w') as readme_file:
     readme_file.write(readme_content)
-
-# Creating ZIP Archive
-# Bundle the entire project directory into a ZIP file
-zip_file_path = shutil.make_archive(base_path.rstrip('/'), 'zip', base_path)
-
